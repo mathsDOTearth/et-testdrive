@@ -1,7 +1,10 @@
 #include <runtime/IRuntime.h>
 #include <runtime/Types.h>
 #include <device-layer/IDeviceLayer.h>
+
+#ifdef ET_SYSEMU
 #include <sw-sysemu/SysEmuOptions.h>
+#endif
 
 #if __has_include(<filesystem>)
 #include <filesystem>
@@ -54,6 +57,7 @@ int main(int argc, char* argv[]) {
     }
     std::cout << "Kernel: " << kernelPath << "\n";
 
+#ifdef ET_SYSEMU
     // Create SysEmu device (not everyone has a physical card)
     emu::SysEmuOptions sysEmuOptions;
     if (fs::exists(BOOTROM_TRAMPOLINE_TO_BL2_ELF)) {
@@ -84,7 +88,14 @@ int main(int argc, char* argv[]) {
 
     std::shared_ptr<dev::IDeviceLayer> deviceLayer =
         dev::IDeviceLayer::createSysEmuDeviceLayer(sysEmuOptions, 1);
-
+#else
+    // Create PCIe-backed ET-SoC-1 device layer.
+    // enableMasterMinion=true opens /dev/et0_ops.
+    // enableServiceProcessor=true opens /dev/et0_mgmt.
+    std::shared_ptr<dev::IDeviceLayer> deviceLayer =
+        dev::IDeviceLayer::createPcieDeviceLayer(true, true);
+#endif
+    
     // Create runtime, get device, create stream
     auto runtime = rt::IRuntime::create(deviceLayer);
     auto devices = runtime->getDevices();
