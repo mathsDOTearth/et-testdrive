@@ -35,11 +35,11 @@ add_executable(hello_host main.cpp)
 target_include_directories(hello_host PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_compile_features(hello_host PRIVATE cxx_std_17)
 if(ET_SYSEMU)
-    target_compile_definitions(ping_pong_host PRIVATE ET_SYSEMU)
+    target_compile_definitions(hello_host PRIVATE ET_SYSEMU)
 endif()
 
 if(ET_SYSEMU)
-    target_link_libraries(ping_pong_host
+    target_link_libraries(hello_host
         PRIVATE
             runtime::etrt
             deviceLayer::deviceLayer
@@ -48,7 +48,7 @@ if(ET_SYSEMU)
             $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0.0>>:stdc++fs>
     )
 else()
-    target_link_libraries(ping_pong_host
+    target_link_libraries(hello_host
         PRIVATE
             runtime::etrt
             deviceLayer::deviceLayer
