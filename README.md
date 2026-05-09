@@ -11,9 +11,17 @@ A minimal project that demonstrates launching a device kernel on a single shire 
 
 Requires a completed et-platform build with packages installed to `/opt/et`. See [et-platform](https://github.com/aifoundry-org/et-platform) for setup instructions
 
+For running with software emulator:
 ```bash
 cd ~/Documents/et-testdrive
-cmake -B build -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev
+cmake -B build -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev -DET_SYSEMU=ON
+cmake --build build
+```
+
+For running with ET-SoC-1 hardware:
+```bash
+cd ~/Documents/et-testdrive
+cmake -B build -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev 
 cmake --build build
 ```
 
