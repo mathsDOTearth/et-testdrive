@@ -2,10 +2,14 @@
 
 find_package(runtime REQUIRED)
 find_package(deviceLayer REQUIRED)
-find_package(sw-sysemu REQUIRED)
 find_package(EsperantoBootLoader REQUIRED)
 find_package(EsperantoDeviceMinionRuntime REQUIRED)
 find_package(esperantoTrace REQUIRED)
+
+if(ET_SYSEMU)
+    find_package(sw-sysemu REQUIRED)
+endif()
+
 
 # Resolve firmware ELF paths from imported targets
 get_property(BOOTROM_TRAMPOLINE_TO_BL2_ELF TARGET EsperantoBootLoader::BootromTrampolineToBL2.elf PROPERTY LOCATION)
@@ -30,14 +34,28 @@ configure_file(Constants.h.in ${CMAKE_CURRENT_BINARY_DIR}/Constants.h)
 add_executable(hello_host main.cpp)
 target_include_directories(hello_host PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_compile_features(hello_host PRIVATE cxx_std_17)
-target_link_libraries(hello_host
-    PRIVATE
-        runtime::etrt
-        deviceLayer::deviceLayer
-        sw-sysemu::sw-sysemu
-        esperantoTrace::et_trace
-        $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0.0>>:stdc++fs>
-)
+if(ET_SYSEMU)
+    target_compile_definitions(ping_pong_host PRIVATE ET_SYSEMU)
+endif()
+
+if(ET_SYSEMU)
+    target_link_libraries(ping_pong_host
+        PRIVATE
+            runtime::etrt
+            deviceLayer::deviceLayer
+            sw-sysemu::sw-sysemu
+            esperantoTrace::et_trace
+            $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0.0>>:stdc++fs>
+    )
+else()
+    target_link_libraries(ping_pong_host
+        PRIVATE
+            runtime::etrt
+            deviceLayer::deviceLayer
+            esperantoTrace::et_trace
+            $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0.0>>:stdc++fs>
+    )
+endif()
 
 install(TARGETS hello_host
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
